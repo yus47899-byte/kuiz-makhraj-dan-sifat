@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kuiz Makhraj & Sifat Huruf</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f3ea;--card:#fff;--fg:#1d2b27;--mut:#5f6f69;--ac:#0f6b57;--bd:#d8d3c4;--ok:#1b7f4b;--okb:#dff3e7;--no:#b3261e;--nob:#fbe3e1}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13201c;--card:#1c2e28;--fg:#eaf1ee;--mut:#9fb3ac;--ac:#4fc1a6;--bd:#2f4a42;--ok:#6fdc9d;--okb:#1d4a33;--no:#ff8a80;--nob:#4d2523}}
+:root[data-theme="dark"]{--bg:#13201c;--card:#1c2e28;--fg:#eaf1ee;--mut:#9fb3ac;--ac:#4fc1a6;--bd:#2f4a42;--ok:#6fdc9d;--okb:#1d4a33;--no:#ff8a80;--nob:#4d2523}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.4rem;margin:0 0 4px}
+p.s{color:var(--mut);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+.bar{height:6px;background:var(--bd);border-radius:4px;margin:8px 0 14px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac)}
+.tag{font-size:.8rem;color:var(--mut);font-weight:600}
+.part{margin-top:16px;padding-top:12px;border-top:1px dashed var(--bd)}
+.part:first-of-type{border-top:0;padding-top:0;margin-top:6px}
+.q{font-size:1.1rem;margin:4px 0 10px}
+.ar{font-family:"Amiri","Traditional Arabic","Scheherazade New","Noto Naskh Arabic",serif;font-size:1.7em;color:var(--ac);display:inline-block;direction:rtl;line-height:1.2}
+.opts{display:grid;gap:8px}
+.opt{padding:11px 14px;border:1.5px solid var(--bd);border-radius:10px;background:var(--card);text-align:left;width:100%}
+.opt:hover:not(:disabled){border-color:var(--ac)}
+.opt.ok{background:var(--okb);border-color:var(--ok)}
+.opt.no{background:var(--nob);border-color:var(--no)}
+.opt:disabled{cursor:default;color:var(--fg)}
+.fb{margin-top:16px;font-size:.95rem;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--bd)}
+.btn{margin-top:14px;padding:11px 20px;border:0;border-radius:10px;background:var(--ac);color:var(--bg);font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.g{background:transparent;border:1.5px solid var(--ac);color:var(--ac);margin-left:8px}
+.inp{width:100%;padding:12px 14px;font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--bd);border-radius:10px}
+.score{font-size:2.4rem;font-weight:700;color:var(--ac);margin:6px 0}
+</style></head><body><main id="app"></main>
+<script>
+// ---------- Data (rujukan: Makhraj Tree & Sifatul Huruf, At-Tartil) ----------
+const PL={r:["Rongga (huruf mad)","اوي"],h1:["Halqum: bahagian atas halqum","غخ"],h2:["Halqum: bahagian tengah halqum","عح"],h3:["Halqum: bahagian pangkal halqum","ءه"],l1:["Lidah: pangkal lidah diangkat dan ditekan ke lelangit lembut","ق"],l2:["Lidah: pangkal lidah ditekan ke lelangit","ك"],l3:["Lidah: tengah lidah ditekan ke langit-langit","جشي"],l4:["Lidah: tepi lidah (ke geraham gigi)","ض"],l5:["Lidah: hujung lidah diletakkan di belakang gigi bawah","زسص"],l6:["Lidah: hujung lidah ditekan ke pangkal gigi atas","تدط"],l7:["Lidah: tepi hujung lidah tekan gusi atas","ل"],l8:["Lidah: hujung lidah tekan gusi atas","ن"],l9:["Lidah: bawah hujung lidah lengkung ke gusi atas","ر"],l10:["Lidah: hujung lidah dikeluarkan antara gigi atas dan bawah","ثذظ"],b1:["Bibir: dua bibir rapatkan serta temu secara kuat","ب"],b2:["Bibir: dua bibir rapatkan serta temu secara ringan","م"],b3:["Bibir: gigi depan bertemu bibir bawah","ف"],b4:["Bibir: muncung dua bibir","و"],n:["Hidung: ghunnah/dengung","من"]};
+const VP={};for(const k in PL)for(const c of PL[k][1])(VP[c]=VP[c]||[]).push(k);
+const SN=["Isti'la","Itbaq","Hams","Tafassyi","Qalqalah","Ghunnah","Istitolah","Sofir","Takrir"];
+const S={"Isti'la":"خصضغطقظ","Itbaq":"صضطظ","Hams":"فحثهشخصسكت","Tafassyi":"ش","Qalqalah":"قطبجد","Ghunnah":"نم","Istitolah":"ض","Sofir":"صزس","Takrir":"ر"};
+const SL={"Isti'la":"Isti'la (lidah terangkat)","Itbaq":"Itbaq (menutup)","Hams":"Hams (nafas terlepas)","Tafassyi":"Tafassyi (berhamburan)","Qalqalah":"Qalqalah (melantun)","Ghunnah":"Ghunnah (dengung)","Istitolah":"Istitolah (berpanjangan)","Sofir":"Sofir (bersiul/berdesir)","Takrir":"Takrir (berulang-ulang)"};
+const DS={"Isti'la":"pangkal lidah terangkat ke langit-langit sehingga suara menjadi tebal","Itbaq":"tepi lidah melengkung dan menghimpit ke langit-langit, suara tebal dan terhimpit","Hams":"nafas terlepas tanpa tersekat ketika menyebut huruf","Tafassyi":"bunyi berhamburan di dalam mulut","Qalqalah":"bunyi melantun apabila huruf itu sukun","Ghunnah":"bunyi dengung yang keluar melalui hidung","Istitolah":"bunyi memanjang di sepanjang tepi lidah","Sofir":"bunyi bersiul/berdesir","Takrir":"hujung lidah bergetar berulang-ulang"};
+const NM={"ء":"hamzah","ب":"ba'","ت":"ta'","ث":"tha'","ج":"jim","ح":"ha'","خ":"kho'","د":"dal","ذ":"dzal","ر":"ra'","ز":"zai","س":"sin","ش":"syin","ص":"shod","ض":"dhod","ط":"tho","ظ":"zho","ع":"'ain","غ":"ghain","ف":"fa'","ق":"qof","ك":"kaf","ل":"lam","م":"mim","ن":"nun","ه":"ha","و":"waw","ي":"ya'","ا":"alif"};
+const LT=[...new Set(SN.flatMap(n=>[...S[n]]))];
+const sOf=c=>SN.filter(n=>S[n].includes(c));
+const multi=LT.filter(c=>sOf(c).length>1);
+// ---------- Helpers ----------
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(77031);
+const sh=(arr,r=Math.random)=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const ar=c=>`<span class="ar">${c}</span>`;
+const cg=k=>k[0];
+function mk(correct,wrong){const o=sh([correct,...wrong],R);return{opts:o,ans:o.indexOf(correct)}}
+function dpl(valid,ok){const pool=Object.keys(PL).filter(k=>!valid.includes(k));const same=sh(pool.filter(k=>cg(k)===cg(ok)),R),oth=sh(pool.filter(k=>cg(k)!==cg(ok)),R);return[...same.slice(0,1),...oth].slice(0,3)}
+// ---------- Bina 5 set (tetap, 10 soalan setiap set) ----------
+let seq;
+for(;;){
+  const p1=sh(LT,R),p2=sh(LT,R),p3=sh(multi,R).slice(0,6);
+  seq=[...p1,...p2,...p3];
+  let ok=true;for(let s=0;s<5;s++)if(new Set(seq.slice(s*10,s*10+10)).size<10)ok=false;
+  if(ok)break;
+}
+const occ={},lo={};
+const STEM=[c=>`Makhraj huruf ${ar(c)} (${NM[c]}) di _____.`,c=>`Huruf ${ar(c)} (${NM[c]}) keluar dari bahagian _____.`,c=>`${ar(c)} (${NM[c]}): makhrajnya terletak di _____.`];
+const SETS=[];
+for(let s=0;s<5;s++){
+  SETS.push(seq.slice(s*10,s*10+10).map(c=>{
+    const k=occ[c]=(occ[c]??-1)+1;
+    lo[c]=lo[c]||sh(sOf(c),R);
+    const n=lo[c][k%lo[c].length];
+    const valid=VP[c],ok=valid[0];
+    const m=mk(PL[ok][0],dpl(valid,ok).map(x=>PL[x][0]));
+    m.stem=STEM[k%3](c);
+    const f=mk(SL[n],sh(SN.filter(x=>!S[x].includes(c)),R).slice(0,3).map(x=>SL[x]));
+    f.stem="Sifatnya _____.";
+    const mates=[...PL[ok][1]].filter(x=>x!==c);
+    const e=`<b>Makhraj:</b> huruf ${ar(c)} keluar dari <i>${PL[ok][0]}</i>${mates.length?` (bersama huruf ${mates.map(ar).join(" ")})`:""}.<br><b>Sifat:</b> huruf ${ar(c)} mempunyai ${sOf(c).map(x=>SL[x]).join(", ")}. <i>${n}</i> bermaksud ${DS[n]}.`;
+    return{c,m,f,e};
+  }));
+}
+// ---------- UI ----------
+let NAME="",cur=0,qi=0,ma=0,sa=0,st={},res=[];
+const app=document.getElementById("app");
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbx927VKnhpxThxwYqU4flZhW1Z5oElQF9R0KBClxy3tAy75mUrBxMsoThwVM18RrbPgeQ/exec";
+function save(){
+  const el=document.getElementById("sv");if(!el)return;
+  if(!SCRIPT_URL.startsWith("https://")){el.textContent="";return}
+  el.textContent="Menghantar keputusan…";
+  fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({nama:NAME,set:cur+1,makhraj:ma,sifat:sa,jumlah:ma+sa})})
+   .then(()=>{el.textContent="✅ Keputusan telah dihantar."}).catch(()=>{el.textContent="⚠️ Keputusan gagal dihantar. Sila beritahu guru."});
+}
+const esc=t=>t.replace(/[<>&]/g,"");
+function home(){
+  app.innerHTML=`<div class="card"><h1>Kuiz Makhraj & Sifat Huruf</h1><p class="s">Sila tulis nama anda untuk bermula.</p><input id="nm" class="inp" type="text" placeholder="Nama penuh" autocomplete="off" maxlength="60" oninput="document.getElementById('go').disabled=!this.value.trim()" onkeydown="if(event.key==='Enter')begin()"><button id="go" class="btn" disabled onclick="begin()">Mula kuiz</button></div>`;
+}
+function begin(){const v=document.getElementById("nm").value.trim();if(!v)return;NAME=esc(v);res=[];start(0)}
+function start(i){cur=i;qi=0;ma=0;sa=0;show()}
+function grp(w,p){return`<div class="opts" id="o${w}">`+p.opts.map((o,i)=>`<button class="opt" onclick="pick('${w}',${i})">${o}</button>`).join("")+`</div>`}
+function show(){
+  const q=SETS[cur][qi];st={m:null,s:null};
+  app.innerHTML=`<div class="card"><div class="tag">${NAME} · Set ${cur+1} · Soalan ${qi+1}/10</div><div class="bar"><i style="width:${qi/10*100}%"></i></div>
+<div class="part"><div class="tag">1. MAKHRAJ</div><div class="q">${q.m.stem}</div>${grp("m",q.m)}</div>
+<div class="part"><div class="tag">2. SIFAT</div><div class="q">${q.f.stem}</div>${grp("s",q.f)}</div>
+<div id="fb"></div><div id="nx"></div></div>`;
+}
+function pick(w,i){
+  if(st[w]!==null)return;st[w]=i;
+  const q=SETS[cur][qi],p=w==="m"?q.m:q.f;
+  document.querySelectorAll(`#o${w} .opt`).forEach((b,j)=>{b.disabled=true;if(j===p.ans)b.classList.add("ok");else if(j===i)b.classList.add("no")});
+  if(i===p.ans)w==="m"?ma++:sa++;
+  if(st.m!==null&&st.s!==null){
+    const t=x=>x?"✅":"❌";
+    document.getElementById("fb").innerHTML=`<div class="fb">Makhraj ${t(st.m===q.m.ans)} · Sifat ${t(st.s===q.f.ans)}<br>${q.e}</div>`;
+    document.getElementById("nx").innerHTML=`<button class="btn" onclick="next()">${qi<9?"Soalan seterusnya":"Lihat keputusan"}</button>`;
+  }
+}
+function next(){qi++;qi<10?show():finish()}
+function finish(){
+  res[cur]={m:ma,s:sa};const sc=ma+sa;
+  const msg=sc>=18?"Cemerlang! Mumtaz.":sc>=14?"Bagus, teruskan berlatih.":sc>=10?"Sederhana — ulang kaji makhraj & sifat.":"Perlu lebih latihan; cuba lagi.";
+  let h=`<div class="card"><div class="tag">${NAME} · Set ${cur+1} selesai</div><div class="score">${sc} / 20</div><p>Makhraj: <b>${ma}/10</b> · Sifat: <b>${sa}/10</b></p><p>${msg}</p><p class="tag" id="sv"></p>`;
+  if(cur<4)h+=`<button class="btn" onclick="start(${cur+1})">Set seterusnya →</button><button class="btn g" onclick="start(${cur})">Ulang set</button>`;
+  else{const tm=res.reduce((a,r)=>a+(r?r.m:0),0),ts=res.reduce((a,r)=>a+(r?r.s:0),0);h+=`<p><b>Jumlah semua set: ${tm+ts} / 100</b><br>Makhraj ${tm}/50 · Sifat ${ts}/50</p><button class="btn" onclick="home()">Pelajar baharu</button><button class="btn g" onclick="start(4)">Ulang Set 5</button>`}
+  app.innerHTML=h+`</div>`;save();
+}
+home();
+</script></body></html>

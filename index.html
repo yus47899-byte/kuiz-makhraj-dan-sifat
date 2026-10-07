@@ -81,14 +81,14 @@ for(let s=0;s<5;s++){
   }));
 }
 // ---------- UI ----------
-let NAME="",cur=0,qi=0,ma=0,sa=0,st={},res=[];
+let NAME="",cur=0,qi=0,ma=0,sa=0,st={},res=[],qm=[];
 const app=document.getElementById("app");
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbx927VKnhpxThxwYqU4flZhW1Z5oElQF9R0KBClxy3tAy75mUrBxMsoThwVM18RrbPgeQ/exec";
 function save(){
   const el=document.getElementById("sv");if(!el)return;
   if(!SCRIPT_URL.startsWith("https://")){el.textContent="";return}
   el.textContent="Menghantar keputusan…";
-  fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({nama:NAME,set:cur+1,makhraj:ma,sifat:sa,jumlah:ma+sa})})
+  fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({nama:NAME,set:cur+1,makhraj:ma,sifat:sa,jumlah:ma+sa,q:qm})})
    .then(()=>{el.textContent="✅ Keputusan telah dihantar."}).catch(()=>{el.textContent="⚠️ Keputusan gagal dihantar. Sila beritahu guru."});
 }
 const esc=t=>t.replace(/[<>&]/g,"");
@@ -96,7 +96,7 @@ function home(){
   app.innerHTML=`<div class="card"><h1>Kuiz Makhraj & Sifat Huruf</h1><p class="s">Sila tulis nama anda untuk bermula.</p><input id="nm" class="inp" type="text" placeholder="Nama penuh" autocomplete="off" maxlength="60" oninput="document.getElementById('go').disabled=!this.value.trim()" onkeydown="if(event.key==='Enter')begin()"><button id="go" class="btn" disabled onclick="begin()">Mula kuiz</button></div>`;
 }
 function begin(){const v=document.getElementById("nm").value.trim();if(!v)return;NAME=esc(v);res=[];start(0)}
-function start(i){cur=i;qi=0;ma=0;sa=0;show()}
+function start(i){cur=i;qi=0;ma=0;sa=0;qm=[];show()}
 function grp(w,p){return`<div class="opts" id="o${w}">`+p.opts.map((o,i)=>`<button class="opt" onclick="pick('${w}',${i})">${o}</button>`).join("")+`</div>`}
 function show(){
   const q=SETS[cur][qi];st={m:null,s:null};
@@ -111,6 +111,7 @@ function pick(w,i){
   document.querySelectorAll(`#o${w} .opt`).forEach((b,j)=>{b.disabled=true;if(j===p.ans)b.classList.add("ok");else if(j===i)b.classList.add("no")});
   if(i===p.ans)w==="m"?ma++:sa++;
   if(st.m!==null&&st.s!==null){
+    qm[qi]=[st.m===q.m.ans?1:0,st.s===q.f.ans?1:0];
     const t=x=>x?"✅":"❌";
     document.getElementById("fb").innerHTML=`<div class="fb">Makhraj ${t(st.m===q.m.ans)} · Sifat ${t(st.s===q.f.ans)}<br>${q.e}</div>`;
     document.getElementById("nx").innerHTML=`<button class="btn" onclick="next()">${qi<9?"Soalan seterusnya":"Lihat keputusan"}</button>`;
